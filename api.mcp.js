@@ -1,17 +1,26 @@
+api.mcp.js
 // api-mcp.js
+// HTTP API that acts as a bridge between HTTP requests and the MCP server
+// Allows accessing MCP methods through standard HTTP/JSON endpoints
+
 import express from 'express';
 import { createMcpClient } from './mcp-client.js';
 
-// Ruta de tu servidor MCP (ajusta si está en otra carpeta)
+// Path to the MCP server (adjust if located elsewhere)
+// This configuration allows easily changing the server location
 const MCP_SERVER_PATH = './mcp-server-prod.js';
 
-// Creamos un cliente *compartido* (puedes cambiar esto si quieres uno por request)
-// Nota: si el servidor MCP es stateless (como el tuyo), reutilizar es seguro y eficiente.
+// Create a *shared* client (you can change this if you want one per request)
+// We use a shared client because:
+// 1. The MCP server is stateless (doesn't maintain state between calls)
+// 2. Reusing the client is more efficient than creating a new one per request
+// 3. Reduces overhead of creating and destroying processes
 const mcpClient = createMcpClient(MCP_SERVER_PATH);
 
-// Manejador de errores para cerrar el cliente al salir
+// Error handler to close the client on exit
+// It's important to close the client to prevent orphaned processes
 const gracefulShutdown = () => {
-    console.log('CloseOperation: Cerrando cliente MCP...');
+    console.log('CloseOperation: Closing MCP client...');
     mcpClient.close();
     process.exit(0);
 };
@@ -19,26 +28,25 @@ const gracefulShutdown = () => {
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 
-// Creamos la app Express
 const app = express();
-
-// Middleware para parsear JSON
 app.use(express.json());
-
-// Ruta principal para llamar métodos MCP
+// Main route to call MCP methods
 app.post('/mcp/call', async (req, res) => {
     const { method, params } = req.body;
 
-    // Validación mínima
+    // Minimum request validation
+    // Check that the method name exists and is a string
     if (!method || typeof method !== 'string') {
         return res.status(400).json({ error: 'Missing or invalid "method"' });
     }
 
     try {
-        // Llamamos al servidor MCP
+        // Call the MCP server to execute the requested method
+        // Using await because MCP communication is asynchronous
         const response = await mcpClient.call(method, params);
 
-        // Si el servidor MCP devolvió un error en el protocolo
+        // If the MCP server returned an error in the protocol
+        // Check if there's an error object in the response
         if (response.error) {
             return res.status(400).json({
                 error: response.error.message,
@@ -46,7 +54,8 @@ app.post('/mcp/call', async (req, res) => {
             });
         }
 
-        // Devolvemos solo el resultado (limpio)
+        // Return only the result (clean)
+        // Format the response to be consistent with HTTP protocol
         res.json({ result: response.result });
     } catch (err) {
         console.error('MCP Call Error:', err);
@@ -54,14 +63,15 @@ app.post('/mcp/call', async (req, res) => {
     }
 });
 
-// Ruta de salud (opcional)
+// Health route (optional)
+// Endpoint to verify that the service is running and operational
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', mcp: 'connected' });
 });
 
-// Iniciar servidor
+// Start HTTP server on the configured port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ API MCP HTTP corriendo en http://localhost:${PORT}`);
-    console.log(`   → Usa POST /mcp/call para invocar métodos MCP`);
+    console.log(`✅ HTTP MCP API running on http://localhost:${PORT}`);
+    console.log(`   → Use POST /mcp/call to invoke MCP methods`);
 });
