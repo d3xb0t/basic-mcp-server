@@ -1,4 +1,3 @@
-api.mcp.js
 // api-mcp.js
 // HTTP API that acts as a bridge between HTTP requests and the MCP server
 // Allows accessing MCP methods through standard HTTP/JSON endpoints
@@ -8,7 +7,7 @@ import { createMcpClient } from './mcp-client.js';
 
 // Path to the MCP server (adjust if located elsewhere)
 // This configuration allows easily changing the server location
-const MCP_SERVER_PATH = './mcp-server-prod.js';
+const MCP_SERVER_PATH = './async-mcp-server-prod.js';
 
 // Create a *shared* client (you can change this if you want one per request)
 // We use a shared client because:
