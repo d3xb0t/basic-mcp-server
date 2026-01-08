@@ -125,8 +125,10 @@ rl.on('line', (line) => {
     }
 });
 
-// Clean shutdown handling to free resources
-// This is important to prevent zombie processes and ensure proper shutdown
+/**
+ * Clean shutdown function to close resources properly
+ * This is important to prevent zombie processes and ensure proper shutdown
+ */
 const cleanup = () => {
     rl.close();
     process.exit(0);

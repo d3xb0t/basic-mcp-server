@@ -16,8 +16,10 @@ const MCP_SERVER_PATH = './async-mcp-server-prod.js';
 // 3. Reduces overhead of creating and destroying processes
 const mcpClient = createMcpClient(MCP_SERVER_PATH);
 
-// Error handler to close the client on exit
-// It's important to close the client to prevent orphaned processes
+/**
+ * Graceful shutdown function to close the client and exit properly
+ * It's important to close the client to prevent orphaned processes
+ */
 const gracefulShutdown = () => {
     console.log('CloseOperation: Closing MCP client...');
     mcpClient.close();
@@ -29,7 +31,16 @@ process.on('SIGTERM', gracefulShutdown);
 
 const app = express();
 app.use(express.json());
-// Main route to call MCP methods
+
+/**
+ * Main route to call MCP methods
+ * 
+ * @param {Object} req - HTTP request object containing method and params
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.method - Name of the MCP method to invoke
+ * @param {Object} req.body.params - Parameters for the method (optional)
+ * @param {Object} res - HTTP response object
+ */
 app.post('/mcp/call', async (req, res) => {
     const { method, params } = req.body;
 
@@ -62,14 +73,20 @@ app.post('/mcp/call', async (req, res) => {
     }
 });
 
-// Health route (optional)
-// Endpoint to verify that the service is running and operational
+/**
+ * Health route (optional)
+ * Endpoint to verify that the service is running and operational
+ * 
+ * @param {Object} req - HTTP request object
+ * @param {Object} res - HTTP response object
+ */
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', mcp: 'connected' });
 });
 
 // Start HTTP server on the configured port
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
     console.log(`✅ HTTP MCP API running on http://localhost:${PORT}`);
     console.log(`   → Use POST /mcp/call to invoke MCP methods`);

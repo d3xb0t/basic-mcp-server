@@ -8,23 +8,13 @@ This project is **NOT designed for production use**. It is an example implementa
 
 ## Description
 
-This project demonstrates a simple implementation of a communication system based on the MCP (Model Context Protocol), which allows remote procedure execution via STDIO. The system includes:
+This project demonstrates a simple implementation of a communication system based on the MCP (Model Context Protocol), which allows remote procedure execution via STDIO. The system provides various capabilities including:
 
-- An MCP server ([mcp-server-prod.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-server-prod.js)) that listens and processes requests
-- An MCP client ([mcp-client.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-client.js)) that sends requests to the server
-- An HTTP API ([api.mcp.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/api.mcp.js)) that acts as a bridge between HTTP requests and the MCP server
-- An asynchronous MCP server ([async-mcp-server-prod.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/async-mcp-server-prod.js)) with Ollama integration
-- Additional server examples ([mcp-server-v2.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-server-v2.js) and [mcp-eco.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-eco.js))
-
-## Concepts Explored
-
-- Inter-process communication (IPC) using STDIO
-- Basic JSON-RPC 2.0 protocol
-- Asynchronous client-server communication
-- Implementation of remote methods
-- Error handling in inter-process communication
-- HTTP to custom protocol bridge
-- Integration with external services (Ollama API)
+- Basic remote procedure calls
+- Asynchronous communication patterns
+- HTTP integration for web-based access
+- AI integration through external services
+- Error handling and robust communication
 
 ## MCP Protocol Specifics
 
@@ -35,17 +25,6 @@ In HTTP-based MCP implementations, the handshake is necessary to:
 - Negotiate protocol versions
 - Exchange capability information
 - Authenticate the connection
-
-## Project Structure
-
-- [api.mcp.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/api.mcp.js) - HTTP API that acts as a bridge to the MCP server
-- [mcp-client.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-client.js) - MCP client that communicates with the server via STDIO
-- [mcp-server-prod.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-server-prod.js) - MCP server that processes RPC requests
-- [async-mcp-server-prod.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/async-mcp-server-prod.js) - Asynchronous MCP server with Ollama integration
-- [mcp-server-v2.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-server-v2.js) - Alternative version of the MCP server
-- [mcp-eco.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/mcp-eco.js) - Additional MCP server example
-- [tools.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/tools.js) - Shared methods implementation including Ollama API integration
-- [test-client-mcp.js](file:///home/d3xb0t/Dev/MCP/STDIO/Tutorial/test-client-mcp.js) - Test client to demonstrate functionality
 
 ## How to Run
 
@@ -102,6 +81,86 @@ You can run the test client to verify functionality:
 node test-client-mcp.js
 ```
 
+## Comprehensive cURL Test Examples
+
+Here are all the necessary test examples using cURL for different methods available in the system:
+
+### Basic Methods
+
+**Ping method:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "ping", "params": {}}'
+```
+
+**Math addition:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "math.add", "params": {"a": 10, "b": 15}}'
+```
+
+**Error test (invalid method):**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "nonexistent.method", "params": {}}'
+```
+
+**Error test (invalid parameters):**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "math.add", "params": {"a": "text", "b": 5}}'
+```
+
+### Methods from mcp-server-v2.js
+
+**String reverse:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "string.reverse", "params": {"text": "hello"}}'
+```
+
+**Time now:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "time.now", "params": {}}'
+```
+
+### Methods from mcp-eco.js
+
+**Echo uppercase:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "echo.upper", "params": {"text": "hello world"}}'
+```
+
+### Advanced Methods with Ollama Integration
+
+**Ollama text completion:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "ollama.complete", "params": {"prompt": "Explain quantum computing in simple terms", "model": "phi3:mini"}}'
+```
+
+**RAG (Retrieval-Augmented Generation) query:**
+```bash
+curl -X POST http://localhost:3000/mcp/call \
+  -H "Content-Type: application/json" \
+  -d '{"method": "rag.query", "params": {"query": "What is the Model Context Protocol?"}}'
+```
+
+**Health check for the API:**
+```bash
+curl -X GET http://localhost:3000/health
+```
+
 ## Available Methods
 
 - `ping` - Returns 'pong'
@@ -110,6 +169,7 @@ node test-client-mcp.js
 - `echo.upper` - Converts text to uppercase (in mcp-eco.js)
 - `string.reverse` - Reverses a string (in mcp-server-v2.js)
 - `time.now` - Returns current time in ISO format (in mcp-server-v2.js)
+- `rag.query` - Performs RAG (Retrieval-Augmented Generation) query using knowledge base
 
 ## Limitations
 

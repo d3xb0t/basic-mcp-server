@@ -1,6 +1,10 @@
 // test-client.js
 import { createMcpClient } from './mcp-client.js';
 
+/**
+ * Main function to test the MCP client functionality
+ * This function tests ping, math.add, and an invalid method call
+ */
 const main = async () => {
     // Asegúrate de que esta ruta apunte a tu servidor funcional
     const client = createMcpClient('./mcp-server-prod.js');

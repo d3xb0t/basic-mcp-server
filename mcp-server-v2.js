@@ -2,11 +2,14 @@
 import { createInterface } from 'node:readline';
 import { stdout } from 'node:process';
 
-//sendResponse recibe un JSON  y lo escribe en stdout
+/**
+ * Sends a response to the MCP client via stdout
+ * 
+ * @param {Object} response - Response object in JSON-RPC format
+ */
 const sendResponse = (response) => {
     stdout.write(JSON.stringify(response) + '\n')
 }
-
 
 // Definimos "herramientas" o métodos disponibles
 const methods = {
@@ -15,7 +18,14 @@ const methods = {
     'time.now': () => new Date().toISOString(),
 };
 
-
+/**
+ * Handles an incoming request from the MCP client
+ * 
+ * @param {Object} request - Incoming request in JSON-RPC format
+ * @param {string} request.method - Name of the method to invoke
+ * @param {any} request.params - Parameters for the method (optional)
+ * @param {number|string|undefined} request.id - Request ID (if it doesn't exist, it's a notification)
+ */
 const handleRequest = (request) => {
     const { method, id } = request;
     const handler = methods[method];
@@ -41,6 +51,9 @@ const handleRequest = (request) => {
     }
 };
 
+// Set up a readline interface to process STDIN line by line
+// We use 'createInterface' to efficiently handle large or fragmented inputs
+// 'crlfDelay: Infinity' prevents splitting lines that contain \r\n
 const rl = createInterface({ input: process.stdin, crlfDelay: Infinity });
 
 rl.on('line', (line) => {
@@ -53,4 +66,5 @@ rl.on('line', (line) => {
     }
 });
 
+// Resume stdin stream so the process doesn't terminate immediately
 process.stdin.resume();

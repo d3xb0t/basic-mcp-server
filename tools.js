@@ -21,6 +21,9 @@ const cosineSimilarity = (a, b) => {
 };
 
 /**
+ * Initializes the knowledge base with text embeddings from Ollama
+ * This function fetches embeddings for pre-defined text snippets and stores them
+ * in the knowledge base for RAG functionality
  * 
  * @returns {Promise<void>}
  */
@@ -89,6 +92,15 @@ const createMethods = () => ({
 
     'ping': () => 'pong',
 
+    /**
+     * Generates text completion using Ollama
+     * 
+     * @param {Object} params - Parameters for the completion
+     * @param {string} params.prompt - Input prompt for text generation
+     * @param {string} [params.model='phi3:mini'] - Model to use for generation
+     * @param {boolean} [params.stream=false] - Whether to stream the response
+     * @returns {Promise<Object>} Generated text and metadata
+     */
     'ollama.complete': async (params) => {
         const { prompt, model = 'phi3:mini', stream = false } = params;
         if (!prompt || typeof prompt !== 'string') {
@@ -121,6 +133,13 @@ const createMethods = () => ({
         };
     },
 
+    /**
+     * Performs RAG (Retrieval-Augmented Generation) query
+     * 
+     * @param {Object} params - Query parameters
+     * @param {string} params.query - Input query to search for
+     * @returns {Promise<Object>} Answer, context, and similarity score
+     */
     'rag.query': async (params) => {
         console.log('🔍 knowledgeBase en rag.query:', knowledgeBase.length);
         console.log('🔍 Contenido de knowledgeBase:', knowledgeBase);// ← AGREGA ESTO
